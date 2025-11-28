@@ -19,11 +19,11 @@ MCP server for the [*arr media management suite](https://wiki.servarr.com/) - So
 
 | Category | Capabilities |
 |----------|-------------|
-| **Sonarr (TV)** | List series, search shows, check queue, view calendar |
-| **Radarr (Movies)** | List movies, search films, check queue, view releases |
-| **Lidarr (Music)** | List artists, search musicians, check queue |
-| **Readarr (Books)** | List authors, search writers, check queue |
-| **Prowlarr (Indexers)** | List indexers, search across all trackers |
+| **Sonarr (TV)** | List series, view episodes, search shows, trigger downloads, check queue, view calendar |
+| **Radarr (Movies)** | List movies, search films, trigger downloads, check queue, view releases |
+| **Lidarr (Music)** | List artists, view albums, search musicians, trigger downloads, check queue, view calendar |
+| **Readarr (Books)** | List authors, view books, search writers, trigger downloads, check queue, view calendar |
+| **Prowlarr (Indexers)** | List indexers, search across all trackers, test health, view statistics |
 | **Cross-Service** | Status check, unified search across all configured services |
 
 ## Prerequisites
@@ -139,6 +139,20 @@ Add to `~/.claude.json`:
 ### Upcoming Releases
 - "What TV episodes are coming this week?"
 - "Show upcoming movie releases"
+- "Any new albums coming out this month?"
+- "Show me upcoming book releases"
+
+### Downloading Content
+- "What episodes of Severance am I missing?"
+- "Download the missing episodes for that show"
+- "Search for this specific movie"
+- "Grab that Japanese Breakfast album"
+- "Download all missing books by Brandon Sanderson"
+
+### Indexer Management
+- "Are my indexers healthy?"
+- "How are my indexers performing?"
+- "Test all my Prowlarr indexers"
 
 ### Cross-Service
 - "Check status of all my *arr services"
@@ -161,6 +175,9 @@ Add to `~/.claude.json`:
 | `sonarr_search` | Search for TV series to add |
 | `sonarr_get_queue` | View current download queue |
 | `sonarr_get_calendar` | See upcoming episodes |
+| `sonarr_get_episodes` | List episodes for a series (shows missing vs available) |
+| `sonarr_search_missing` | Trigger search for all missing episodes in a series |
+| `sonarr_search_episode` | Trigger search for specific episode(s) |
 
 ### Radarr Tools (Movies)
 
@@ -170,6 +187,7 @@ Add to `~/.claude.json`:
 | `radarr_search` | Search for movies to add |
 | `radarr_get_queue` | View current download queue |
 | `radarr_get_calendar` | See upcoming releases |
+| `radarr_search_movie` | Trigger search to download a movie in your library |
 
 ### Lidarr Tools (Music)
 
@@ -178,6 +196,10 @@ Add to `~/.claude.json`:
 | `lidarr_get_artists` | List all artists in your library |
 | `lidarr_search` | Search for artists to add |
 | `lidarr_get_queue` | View current download queue |
+| `lidarr_get_albums` | List albums for an artist (shows missing vs available) |
+| `lidarr_search_album` | Trigger search for a specific album |
+| `lidarr_search_missing` | Trigger search for all missing albums for an artist |
+| `lidarr_get_calendar` | See upcoming album releases |
 
 ### Readarr Tools (Books)
 
@@ -186,6 +208,10 @@ Add to `~/.claude.json`:
 | `readarr_get_authors` | List all authors in your library |
 | `readarr_search` | Search for authors to add |
 | `readarr_get_queue` | View current download queue |
+| `readarr_get_books` | List books for an author (shows missing vs available) |
+| `readarr_search_book` | Trigger search for specific book(s) |
+| `readarr_search_missing` | Trigger search for all missing books for an author |
+| `readarr_get_calendar` | See upcoming book releases |
 
 ### Prowlarr Tools (Indexers)
 
@@ -193,6 +219,8 @@ Add to `~/.claude.json`:
 |------|-------------|
 | `prowlarr_get_indexers` | List all configured indexers |
 | `prowlarr_search` | Search across all indexers |
+| `prowlarr_test_indexers` | Test all indexers and return health status |
+| `prowlarr_get_stats` | Get indexer statistics (queries, grabs, failures) |
 
 ## Development
 
