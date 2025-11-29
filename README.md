@@ -13,18 +13,20 @@ MCP server for the [*arr media management suite](https://wiki.servarr.com/) - So
 - **Cross-service search** - Find content across TV, movies, music, and books simultaneously
 - **Download monitoring** - Check queue status and progress across all services
 - **Calendar integration** - See upcoming releases for all media types
+- **Configuration review** - Get AI-powered suggestions for optimizing your setup
 - **Flexible configuration** - Enable only the services you use
 
 ## Features
 
 | Category | Capabilities |
 |----------|-------------|
-| **Sonarr (TV)** | List series, view episodes, search shows, trigger downloads, check queue, view calendar |
-| **Radarr (Movies)** | List movies, search films, trigger downloads, check queue, view releases |
-| **Lidarr (Music)** | List artists, view albums, search musicians, trigger downloads, check queue, view calendar |
-| **Readarr (Books)** | List authors, view books, search writers, trigger downloads, check queue, view calendar |
+| **Sonarr (TV)** | List series, view episodes, search shows, trigger downloads, check queue, view calendar, review setup |
+| **Radarr (Movies)** | List movies, search films, trigger downloads, check queue, view releases, review setup |
+| **Lidarr (Music)** | List artists, view albums, search musicians, trigger downloads, check queue, view calendar, review setup |
+| **Readarr (Books)** | List authors, view books, search writers, trigger downloads, check queue, view calendar, review setup |
 | **Prowlarr (Indexers)** | List indexers, search across all trackers, test health, view statistics |
 | **Cross-Service** | Status check, unified search across all configured services |
+| **Configuration** | Quality profiles, download clients, naming conventions, health checks, storage info |
 
 ## Prerequisites
 
@@ -154,6 +156,15 @@ Add to `~/.claude.json`:
 - "How are my indexers performing?"
 - "Test all my Prowlarr indexers"
 
+### Configuration Review (NEW)
+- "Review my Sonarr setup and suggest improvements"
+- "Show me my quality profiles in Radarr"
+- "Are there any health issues with my Lidarr?"
+- "What naming convention am I using for TV shows?"
+- "Help me understand my quality profiles - why am I not getting 4K?"
+- "Check my download client configuration"
+- "How much free space do I have on my root folders?"
+
 ### Cross-Service
 - "Check status of all my *arr services"
 - "Search for 'The Office' across all services"
@@ -221,6 +232,24 @@ Add to `~/.claude.json`:
 | `prowlarr_search` | Search across all indexers |
 | `prowlarr_test_indexers` | Test all indexers and return health status |
 | `prowlarr_get_stats` | Get indexer statistics (queries, grabs, failures) |
+
+### Configuration Review Tools
+
+These tools are available for Sonarr, Radarr, Lidarr, and Readarr. Replace `{service}` with the service name (e.g., `sonarr_get_quality_profiles`).
+
+| Tool | Description |
+|------|-------------|
+| `{service}_get_quality_profiles` | Detailed quality profile information with allowed qualities and custom format scores |
+| `{service}_get_health` | Health check warnings and issues detected by the application |
+| `{service}_get_root_folders` | Storage paths, free space, and accessibility status |
+| `{service}_get_download_clients` | Download client configurations and settings |
+| `{service}_get_naming` | File and folder naming conventions |
+| `{service}_get_tags` | Tag definitions for content organization |
+| `{service}_review_setup` | **Comprehensive configuration dump for AI-assisted setup analysis** |
+
+The `{service}_review_setup` tool returns all configuration in a single call, enabling natural language conversations about optimizing your setup. Claude can analyze your quality profiles, suggest improvements, explain why certain content isn't being grabbed, and help configure complex settings like custom formats.
+
+> **⚠️ Disclaimer**: The configuration review tools provide **read-only** access to your *arr settings. Any changes to your configuration must be made directly in the *arr application interfaces. The AI's suggestions are recommendations only - always back up your configuration before making significant changes. The maintainers are not responsible for any configuration changes, data loss, or other issues that may arise from following AI-generated recommendations.
 
 ## Development
 

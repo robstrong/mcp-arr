@@ -286,6 +286,143 @@ export interface Indexer {
   added: string;
 }
 
+// Configuration interfaces
+export interface QualityProfile {
+  id: number;
+  name: string;
+  upgradeAllowed: boolean;
+  cutoff: number;
+  items: Array<{
+    id?: number;
+    name?: string;
+    quality?: { id: number; name: string; source: string; resolution: number };
+    items?: Array<{ quality: { id: number; name: string } }>;
+    allowed: boolean;
+  }>;
+  minFormatScore: number;
+  cutoffFormatScore: number;
+  formatItems: Array<{
+    format: number;
+    name: string;
+    score: number;
+  }>;
+}
+
+export interface QualityDefinition {
+  id: number;
+  quality: {
+    id: number;
+    name: string;
+    source: string;
+    resolution: number;
+  };
+  title: string;
+  weight: number;
+  minSize: number;
+  maxSize: number;
+  preferredSize: number;
+}
+
+export interface DownloadClient {
+  id: number;
+  name: string;
+  implementation: string;
+  implementationName: string;
+  configContract: string;
+  enable: boolean;
+  protocol: string;
+  priority: number;
+  removeCompletedDownloads: boolean;
+  removeFailedDownloads: boolean;
+  fields: Array<{
+    name: string;
+    value: unknown;
+  }>;
+  tags: number[];
+}
+
+export interface NamingConfig {
+  renameEpisodes?: boolean;
+  replaceIllegalCharacters: boolean;
+  colonReplacementFormat?: string;
+  standardEpisodeFormat?: string;
+  dailyEpisodeFormat?: string;
+  animeEpisodeFormat?: string;
+  seriesFolderFormat?: string;
+  seasonFolderFormat?: string;
+  specialsFolderFormat?: string;
+  multiEpisodeStyle?: number;
+  // Radarr
+  renameMovies?: boolean;
+  movieFolderFormat?: string;
+  standardMovieFormat?: string;
+  // Lidarr
+  renameTracks?: boolean;
+  artistFolderFormat?: string;
+  albumFolderFormat?: string;
+  trackFormat?: string;
+  // Readarr
+  renameBooks?: boolean;
+  authorFolderFormat?: string;
+  bookFolderFormat?: string;
+  standardBookFormat?: string;
+}
+
+export interface MediaManagementConfig {
+  autoUnmonitorPreviouslyDownloadedEpisodes?: boolean;
+  autoUnmonitorPreviouslyDownloadedMovies?: boolean;
+  recycleBin: string;
+  recycleBinCleanupDays: number;
+  downloadPropersAndRepacks: string;
+  createEmptySeriesFolders?: boolean;
+  createEmptyMovieFolders?: boolean;
+  deleteEmptyFolders: boolean;
+  fileDate: string;
+  rescanAfterRefresh: string;
+  setPermissionsLinux: boolean;
+  chmodFolder: string;
+  chownGroup: string;
+  episodeTitleRequired?: string;
+  skipFreeSpaceCheckWhenImporting: boolean;
+  minimumFreeSpaceWhenImporting: number;
+  copyUsingHardlinks: boolean;
+  importExtraFiles: boolean;
+  extraFileExtensions: string;
+  enableMediaInfo: boolean;
+}
+
+export interface HealthCheck {
+  source: string;
+  type: string;
+  message: string;
+  wikiUrl: string;
+}
+
+export interface Tag {
+  id: number;
+  label: string;
+}
+
+export interface RootFolder {
+  id: number;
+  path: string;
+  accessible: boolean;
+  freeSpace: number;
+  unmappedFolders?: Array<{ name: string; path: string }>;
+}
+
+export interface MetadataProfile {
+  id: number;
+  name: string;
+  minPopularity?: number;
+  skipMissingDate: boolean;
+  skipMissingIsbn: boolean;
+  skipPartsAndSets: boolean;
+  skipSeriesSecondary: boolean;
+  allowedLanguages?: string;
+  minPages?: number;
+}
+
 export interface SearchResult {
   title: string;
   sortTitle: string;
@@ -375,13 +512,6 @@ export class ArrClient {
   }
 
   /**
-   * Get quality profiles
-   */
-  async getQualityProfiles(): Promise<Array<{ id: number; name: string }>> {
-    return this.request<Array<{ id: number; name: string }>>('/qualityprofile');
-  }
-
-  /**
    * Test connection
    */
   async testConnection(): Promise<boolean> {
@@ -391,6 +521,69 @@ export class ArrClient {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Get quality profiles
+   */
+  async getQualityProfiles(): Promise<QualityProfile[]> {
+    return this.request<QualityProfile[]>('/qualityprofile');
+  }
+
+  /**
+   * Get quality definitions (size limits)
+   */
+  async getQualityDefinitions(): Promise<QualityDefinition[]> {
+    return this.request<QualityDefinition[]>('/qualitydefinition');
+  }
+
+  /**
+   * Get download clients
+   */
+  async getDownloadClients(): Promise<DownloadClient[]> {
+    return this.request<DownloadClient[]>('/downloadclient');
+  }
+
+  /**
+   * Get naming configuration
+   */
+  async getNamingConfig(): Promise<NamingConfig> {
+    return this.request<NamingConfig>('/config/naming');
+  }
+
+  /**
+   * Get media management configuration
+   */
+  async getMediaManagement(): Promise<MediaManagementConfig> {
+    return this.request<MediaManagementConfig>('/config/mediamanagement');
+  }
+
+  /**
+   * Get health check issues
+   */
+  async getHealth(): Promise<HealthCheck[]> {
+    return this.request<HealthCheck[]>('/health');
+  }
+
+  /**
+   * Get all tags
+   */
+  async getTags(): Promise<Tag[]> {
+    return this.request<Tag[]>('/tag');
+  }
+
+  /**
+   * Get detailed root folders
+   */
+  async getRootFoldersDetailed(): Promise<RootFolder[]> {
+    return this.request<RootFolder[]>('/rootfolder');
+  }
+
+  /**
+   * Get indexers (per-app configuration, not Prowlarr)
+   */
+  async getIndexers(): Promise<Indexer[]> {
+    return this.request<Indexer[]>('/indexer');
   }
 }
 
@@ -627,6 +820,13 @@ export class LidarrClient extends ArrClient {
     const query = params.toString() ? `?${params.toString()}` : '';
     return this['request']<Album[]>(`/calendar${query}`);
   }
+
+  /**
+   * Get metadata profiles
+   */
+  async getMetadataProfiles(): Promise<MetadataProfile[]> {
+    return this['request']<MetadataProfile[]>('/metadataprofile');
+  }
 }
 
 export class ReadarrClient extends ArrClient {
@@ -722,6 +922,13 @@ export class ReadarrClient extends ArrClient {
     if (end) params.append('end', end);
     const query = params.toString() ? `?${params.toString()}` : '';
     return this['request']<Book[]>(`/calendar${query}`);
+  }
+
+  /**
+   * Get metadata profiles
+   */
+  async getMetadataProfiles(): Promise<MetadataProfile[]> {
+    return this['request']<MetadataProfile[]>('/metadataprofile');
   }
 }
 

@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-11-29
+
+### Added
+- **Configuration Review Tools** - New tools to inspect and analyze *arr service configurations:
+  - `{service}_get_quality_profiles` - Detailed quality profile information including allowed qualities, upgrade settings, and custom format scores
+  - `{service}_get_health` - Health check warnings and issues detected by the application
+  - `{service}_get_root_folders` - Storage paths, free space, and accessibility status
+  - `{service}_get_download_clients` - Download client configurations and settings
+  - `{service}_get_naming` - File and folder naming conventions
+  - `{service}_get_tags` - Tag definitions for content organization
+  - `{service}_review_setup` - Comprehensive configuration dump for AI-assisted setup analysis
+
+  These tools are available for Sonarr, Radarr, Lidarr, and Readarr (replace `{service}` with service name).
+
+- New API client methods for configuration retrieval:
+  - `getQualityProfiles()` - Full quality profile details
+  - `getQualityDefinitions()` - Size limits per quality level
+  - `getDownloadClients()` - Download client configurations
+  - `getNamingConfig()` - Naming conventions
+  - `getMediaManagement()` - File handling settings
+  - `getHealth()` - Health check warnings
+  - `getTags()` - Tag definitions
+  - `getIndexers()` - Per-app indexer configs
+  - `getMetadataProfiles()` - Metadata profiles (Lidarr/Readarr only)
+
+### Purpose
+The new configuration review tools enable natural language conversations about *arr setup optimization. Users can ask Claude to review their configuration and suggest improvements, especially helpful for understanding complex quality profiles and media management settings.
+
 ## [1.2.0] - 2025-11-28
 
 ### Added

@@ -98,6 +98,84 @@ const TOOLS: Tool[] = [
   },
 ];
 
+// Configuration review tools for each service
+// These are added dynamically based on configured services
+
+// Helper function to create config tools for a service
+function addConfigTools(serviceName: string, displayName: string) {
+  TOOLS.push(
+    {
+      name: `${serviceName}_get_quality_profiles`,
+      description: `Get detailed quality profiles from ${displayName}. Shows allowed qualities, upgrade settings, and custom format scores.`,
+      inputSchema: {
+        type: "object" as const,
+        properties: {},
+        required: [],
+      },
+    },
+    {
+      name: `${serviceName}_get_health`,
+      description: `Get health check warnings and issues from ${displayName}. Shows any problems detected by the application.`,
+      inputSchema: {
+        type: "object" as const,
+        properties: {},
+        required: [],
+      },
+    },
+    {
+      name: `${serviceName}_get_root_folders`,
+      description: `Get root folders and storage info from ${displayName}. Shows paths, free space, and unmapped folders.`,
+      inputSchema: {
+        type: "object" as const,
+        properties: {},
+        required: [],
+      },
+    },
+    {
+      name: `${serviceName}_get_download_clients`,
+      description: `Get download client configurations from ${displayName}. Shows configured clients and their settings.`,
+      inputSchema: {
+        type: "object" as const,
+        properties: {},
+        required: [],
+      },
+    },
+    {
+      name: `${serviceName}_get_naming`,
+      description: `Get file naming configuration from ${displayName}. Shows naming patterns for files and folders.`,
+      inputSchema: {
+        type: "object" as const,
+        properties: {},
+        required: [],
+      },
+    },
+    {
+      name: `${serviceName}_get_tags`,
+      description: `Get all tags defined in ${displayName}. Tags can be used to organize and filter content.`,
+      inputSchema: {
+        type: "object" as const,
+        properties: {},
+        required: [],
+      },
+    },
+    {
+      name: `${serviceName}_review_setup`,
+      description: `Get comprehensive configuration review for ${displayName}. Returns all settings for analysis: quality profiles, download clients, naming, storage, indexers, health warnings, and more. Use this to analyze the setup and suggest improvements.`,
+      inputSchema: {
+        type: "object" as const,
+        properties: {},
+        required: [],
+      },
+    }
+  );
+}
+
+// Add config tools for each configured service (except Prowlarr which has different config)
+if (clients.sonarr) addConfigTools('sonarr', 'Sonarr (TV)');
+if (clients.radarr) addConfigTools('radarr', 'Radarr (Movies)');
+if (clients.lidarr) addConfigTools('lidarr', 'Lidarr (Music)');
+if (clients.readarr) addConfigTools('readarr', 'Readarr (Books)');
+
 // Sonarr tools
 if (clients.sonarr) {
   TOOLS.push(
@@ -569,6 +647,269 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
         return {
           content: [{ type: "text", text: JSON.stringify(statuses, null, 2) }],
+        };
+      }
+
+      // Dynamic config tool handlers
+      // Quality Profiles
+      case "sonarr_get_quality_profiles":
+      case "radarr_get_quality_profiles":
+      case "lidarr_get_quality_profiles":
+      case "readarr_get_quality_profiles": {
+        const serviceName = name.split('_')[0] as keyof typeof clients;
+        const client = clients[serviceName];
+        if (!client) throw new Error(`${serviceName} not configured`);
+        const profiles = await client.getQualityProfiles();
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({
+              count: profiles.length,
+              profiles: profiles.map(p => ({
+                id: p.id,
+                name: p.name,
+                upgradeAllowed: p.upgradeAllowed,
+                cutoff: p.cutoff,
+                allowedQualities: p.items
+                  .filter(i => i.allowed)
+                  .map(i => i.quality?.name || i.name || (i.items?.map(q => q.quality.name).join(', ')))
+                  .filter(Boolean),
+                customFormats: p.formatItems?.filter(f => f.score !== 0).map(f => ({
+                  name: f.name,
+                  score: f.score,
+                })) || [],
+                minFormatScore: p.minFormatScore,
+                cutoffFormatScore: p.cutoffFormatScore,
+              })),
+            }, null, 2),
+          }],
+        };
+      }
+
+      // Health checks
+      case "sonarr_get_health":
+      case "radarr_get_health":
+      case "lidarr_get_health":
+      case "readarr_get_health": {
+        const serviceName = name.split('_')[0] as keyof typeof clients;
+        const client = clients[serviceName];
+        if (!client) throw new Error(`${serviceName} not configured`);
+        const health = await client.getHealth();
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({
+              issueCount: health.length,
+              issues: health.map(h => ({
+                source: h.source,
+                type: h.type,
+                message: h.message,
+                wikiUrl: h.wikiUrl,
+              })),
+              status: health.length === 0 ? 'healthy' : 'issues detected',
+            }, null, 2),
+          }],
+        };
+      }
+
+      // Root folders
+      case "sonarr_get_root_folders":
+      case "radarr_get_root_folders":
+      case "lidarr_get_root_folders":
+      case "readarr_get_root_folders": {
+        const serviceName = name.split('_')[0] as keyof typeof clients;
+        const client = clients[serviceName];
+        if (!client) throw new Error(`${serviceName} not configured`);
+        const folders = await client.getRootFoldersDetailed();
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({
+              count: folders.length,
+              folders: folders.map(f => ({
+                id: f.id,
+                path: f.path,
+                accessible: f.accessible,
+                freeSpace: formatBytes(f.freeSpace),
+                freeSpaceBytes: f.freeSpace,
+                unmappedFolders: f.unmappedFolders?.length || 0,
+              })),
+            }, null, 2),
+          }],
+        };
+      }
+
+      // Download clients
+      case "sonarr_get_download_clients":
+      case "radarr_get_download_clients":
+      case "lidarr_get_download_clients":
+      case "readarr_get_download_clients": {
+        const serviceName = name.split('_')[0] as keyof typeof clients;
+        const client = clients[serviceName];
+        if (!client) throw new Error(`${serviceName} not configured`);
+        const downloadClients = await client.getDownloadClients();
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({
+              count: downloadClients.length,
+              clients: downloadClients.map(c => ({
+                id: c.id,
+                name: c.name,
+                implementation: c.implementationName,
+                protocol: c.protocol,
+                enabled: c.enable,
+                priority: c.priority,
+                removeCompletedDownloads: c.removeCompletedDownloads,
+                removeFailedDownloads: c.removeFailedDownloads,
+                tags: c.tags,
+              })),
+            }, null, 2),
+          }],
+        };
+      }
+
+      // Naming config
+      case "sonarr_get_naming":
+      case "radarr_get_naming":
+      case "lidarr_get_naming":
+      case "readarr_get_naming": {
+        const serviceName = name.split('_')[0] as keyof typeof clients;
+        const client = clients[serviceName];
+        if (!client) throw new Error(`${serviceName} not configured`);
+        const naming = await client.getNamingConfig();
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(naming, null, 2),
+          }],
+        };
+      }
+
+      // Tags
+      case "sonarr_get_tags":
+      case "radarr_get_tags":
+      case "lidarr_get_tags":
+      case "readarr_get_tags": {
+        const serviceName = name.split('_')[0] as keyof typeof clients;
+        const client = clients[serviceName];
+        if (!client) throw new Error(`${serviceName} not configured`);
+        const tags = await client.getTags();
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({
+              count: tags.length,
+              tags: tags.map(t => ({ id: t.id, label: t.label })),
+            }, null, 2),
+          }],
+        };
+      }
+
+      // Comprehensive setup review
+      case "sonarr_review_setup":
+      case "radarr_review_setup":
+      case "lidarr_review_setup":
+      case "readarr_review_setup": {
+        const serviceName = name.split('_')[0] as keyof typeof clients;
+        const client = clients[serviceName];
+        if (!client) throw new Error(`${serviceName} not configured`);
+
+        // Gather all configuration data
+        const [status, health, qualityProfiles, qualityDefinitions, downloadClients, naming, mediaManagement, rootFolders, tags, indexers] = await Promise.all([
+          client.getStatus(),
+          client.getHealth(),
+          client.getQualityProfiles(),
+          client.getQualityDefinitions(),
+          client.getDownloadClients(),
+          client.getNamingConfig(),
+          client.getMediaManagement(),
+          client.getRootFoldersDetailed(),
+          client.getTags(),
+          client.getIndexers(),
+        ]);
+
+        // For Lidarr/Readarr, also get metadata profiles
+        let metadataProfiles = null;
+        if (serviceName === 'lidarr' && clients.lidarr) {
+          metadataProfiles = await clients.lidarr.getMetadataProfiles();
+        } else if (serviceName === 'readarr' && clients.readarr) {
+          metadataProfiles = await clients.readarr.getMetadataProfiles();
+        }
+
+        const review = {
+          service: serviceName,
+          version: status.version,
+          appName: status.appName,
+          platform: {
+            os: status.osName,
+            isDocker: status.isDocker,
+          },
+          health: {
+            issueCount: health.length,
+            issues: health,
+          },
+          storage: {
+            rootFolders: rootFolders.map(f => ({
+              path: f.path,
+              accessible: f.accessible,
+              freeSpace: formatBytes(f.freeSpace),
+              freeSpaceBytes: f.freeSpace,
+              unmappedFolderCount: f.unmappedFolders?.length || 0,
+            })),
+          },
+          qualityProfiles: qualityProfiles.map(p => ({
+            id: p.id,
+            name: p.name,
+            upgradeAllowed: p.upgradeAllowed,
+            cutoff: p.cutoff,
+            allowedQualities: p.items
+              .filter(i => i.allowed)
+              .map(i => i.quality?.name || i.name || (i.items?.map(q => q.quality.name).join(', ')))
+              .filter(Boolean),
+            customFormatsWithScores: p.formatItems?.filter(f => f.score !== 0).length || 0,
+            minFormatScore: p.minFormatScore,
+          })),
+          qualityDefinitions: qualityDefinitions.map(d => ({
+            quality: d.quality.name,
+            minSize: d.minSize + ' MB/min',
+            maxSize: d.maxSize === 0 ? 'unlimited' : d.maxSize + ' MB/min',
+            preferredSize: d.preferredSize + ' MB/min',
+          })),
+          downloadClients: downloadClients.map(c => ({
+            name: c.name,
+            type: c.implementationName,
+            protocol: c.protocol,
+            enabled: c.enable,
+            priority: c.priority,
+          })),
+          indexers: indexers.map(i => ({
+            name: i.name,
+            protocol: i.protocol,
+            enableRss: i.enableRss,
+            enableAutomaticSearch: i.enableAutomaticSearch,
+            enableInteractiveSearch: i.enableInteractiveSearch,
+            priority: i.priority,
+          })),
+          naming: naming,
+          mediaManagement: {
+            recycleBin: mediaManagement.recycleBin || 'not set',
+            recycleBinCleanupDays: mediaManagement.recycleBinCleanupDays,
+            downloadPropersAndRepacks: mediaManagement.downloadPropersAndRepacks,
+            deleteEmptyFolders: mediaManagement.deleteEmptyFolders,
+            copyUsingHardlinks: mediaManagement.copyUsingHardlinks,
+            importExtraFiles: mediaManagement.importExtraFiles,
+            extraFileExtensions: mediaManagement.extraFileExtensions,
+          },
+          tags: tags.map(t => t.label),
+          ...(metadataProfiles && { metadataProfiles }),
+        };
+
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(review, null, 2),
+          }],
         };
       }
 
