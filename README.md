@@ -127,13 +127,13 @@ Add to `~/.claude.json`:
 - "Show me all my TV series"
 - "What movies do I have in Radarr?"
 - "List all artists in my music library"
-- "How many books do I have by Stephen King?"
+- "How many books do I have by this author?"
 
 ### Searching for Content
-- "Search for Breaking Bad on Sonarr"
-- "Find the movie Inception"
-- "Search for Taylor Swift albums"
-- "Look up books by Brandon Sanderson"
+- "Search for sci-fi shows on Sonarr"
+- "Find action movies from the 90s"
+- "Search for jazz albums"
+- "Look up fantasy book series"
 
 ### Download Queue
 - "What's downloading right now?"
@@ -147,18 +147,18 @@ Add to `~/.claude.json`:
 - "Show me upcoming book releases"
 
 ### Downloading Content
-- "What episodes of Severance am I missing?"
-- "Download the missing episodes for that show"
+- "What episodes of this show am I missing?"
+- "Download the missing episodes for that series"
 - "Search for this specific movie"
-- "Grab that Japanese Breakfast album"
-- "Download all missing books by Brandon Sanderson"
+- "Grab that album I'm missing"
+- "Download all missing books for this author"
 
 ### Indexer Management
 - "Are my indexers healthy?"
 - "How are my indexers performing?"
 - "Test all my Prowlarr indexers"
 
-### Configuration Review (NEW)
+### Configuration Review
 - "Review my Sonarr setup and suggest improvements"
 - "Show me my quality profiles in Radarr"
 - "Are there any health issues with my Lidarr?"
@@ -169,7 +169,7 @@ Add to `~/.claude.json`:
 
 ### Cross-Service
 - "Check status of all my *arr services"
-- "Search for 'The Office' across all services"
+- "Search for 'comedy' across all services"
 
 ## Available Tools
 
