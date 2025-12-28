@@ -19,7 +19,7 @@ about:
   icon: https://wiki.servarr.com/assets/servarr.png
 source:
   project: https://github.com/aplaceforallmystuff/mcp-arr
-  commit: 7fa801bc7c19ea67b2dbe48a1fcae5c3122f1a17
+  commit: 41ea006ce123e1e52786c02500802b0839e2557b
 config:
   description: |
     Configure URLs and API keys for your *arr services. Only configure the services you use -
