@@ -1,8 +1,10 @@
 # MCP *arr Server
 
-<p align="center">
+![Architecture](docs/images/architecture-diagram.png)
+
+<!-- <p align="center">
   <img src="docs/mcp-arr-logo.png" alt="MCP *arr Server" width="400">
-</p>
+</p> -->
 
 [![npm version](https://img.shields.io/npm/v/mcp-arr-server.svg)](https://www.npmjs.com/package/mcp-arr-server)
 [![CI](https://github.com/aplaceforallmystuff/mcp-arr/actions/workflows/ci.yml/badge.svg)](https://github.com/aplaceforallmystuff/mcp-arr/actions/workflows/ci.yml)
